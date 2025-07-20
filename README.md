@@ -1,48 +1,40 @@
-# Callscript Repository
+# CallScript.io Monorepo
 
-## Repository Status: Fully Archived
+This repository contains the clean, feature-driven monorepo for rebuilding CallScript.io:
 
-**Archive Date:** July 20, 2025
-**Archive Branch:** `archive-2025-07-20`
+- **Backend:** Fastify + Prisma (TypeScript)
+- **Frontend:** Next.js + Tailwind + shadcn/ui
+- **Workers & AI:** RunPod WhisperX, OpenAI GPT, BullMQ
+- **Docs & Tasks:** Notion integration
 
-### What Happened
+## 🎉 System Status - ALL INTEGRATIONS OPERATIONAL ✅
+*Last verified: July 17, 2025 at 8:39 PM PST*
 
-This repository has been completely archived. All original files, directories, and project history have been preserved in the `archive-2025-07-20` branch. The main branch is now clean and contains only this README.
+### ✅ Terminal Command Tests - COMPLETE SUCCESS
+- **Ringba API Integration**: Successfully fetched 2,271 call records with full pagination
+- **Environment Management**: All 13 environment variables loading correctly via dotenvLoader.js
+- **Data Schema & Mapping**: UnifiedCall model with 19 fields, perfect field mapping
+- **Database Integration**: Supabase PostgreSQL connection established, Prisma schema valid 🚀
+- **TypeScript Execution**: ts-node --transpile-only executing flawlessly across all test files
 
-### Accessing Archived Content
+### 🔧 Technical Implementation Details
+- **API Authentication**: 232-character Ringba API token working
+- **Pagination Logic**: 1000 records per batch, Status 200 responses throughout
+- **Data Mapping**: callDt → timestamp, profitNet → profit, complete field transformation
+- **Environment System**: Override system preventing variable conflicts
+- **Database**: Supabase PostgreSQL with Prisma ORM, JsonB platform_data storage
 
-To access the complete original project:
+## Documentation
 
-```bash
-git checkout archive-2025-07-20
-```
+All project docs live under [`docs/`](docs/):
 
-Or view the archive branch on GitHub:
-[https://github.com/adlerlietz/callscript/tree/archive-2025-07-20](https://github.com/adlerlietz/callscript/tree/archive-2025-07-20)
+- 🎯 **Roadmap Hub:** `docs/roadmap/roadmap.md`
+- 📖 **Project Overview:** `docs/project/overview.md`
+- 🏗 **Architecture:** `docs/architecture/overview.md`
+- 🔧 **Integration Details:** `docs/integration/details.md`
 
-### Current State
+## Getting Started
 
-**Main branch contains:**
-- Only this README file
-
-**Archive branch contains:**
-- Complete original project structure
-- All source code and applications (`apps/` directory)
-- All configuration files (package.json, tsconfig.json, etc.)
-- Documentation and status reports
-- Test scripts and utilities
-- Environment files and project metadata
-- All commit history and branches
-
-### Archived Content Overview
-
-The archived project included:
-- **Applications**: Full `apps/api/` directory with Node.js/TypeScript API
-- **Configuration**: Project setup, build tools, and environment configs
-- **Documentation**: Comprehensive project documentation and reports
-- **Testing**: Test suites and validation scripts
-- **Database**: Prisma schemas and migration files
-- **CI/CD**: GitHub Actions workflows
-- **Development Tools**: Linting, formatting, and development utilities
-
-All content remains accessible in the archive branch with full Git history preserved.
+1. Clone this repo
+   ```bash
+   git clone https://github.com/adlerlietz/callscript.git

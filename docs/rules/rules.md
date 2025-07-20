@@ -1,104 +1,101 @@
 ---
-title: "CallScript.io Development Rules"
+title: "Windsurf Agent Rules for CallScript.io"
 date: "2025-07-20"
-tags: ["rules", "standards", "best-practices"]
+tags: ["windsurf","agent-rules"]
 ---
 
-# CallScript.io Development Rules - Complete Reference
+# 1. File Indexing & Discovery
 
-**Last updated:** July 19, 2025
+- **Scope:** Only index `/docs/` (exclude everything else).
+- **Front-Matter:** Parse `title`, `date`, `tags` for metadata lookup.
+- **Chunking:** Split files >200 lines on H1–H3 boundaries.
+- **Lookup:** Support `@docs <tag>` (front-matter), then filename, then full-text search.
+
+# 2. Interaction Protocol
+
+- **Context Load:** Before any work, read and confirm understanding of:
+  - `database_schema.md`
+  - `change_log.md`
+  - `specs.md`
+  - `docs/roadmap/roadmap.md`
+- **Explicit Commands Only:**
+  - Honor `[No Code]` markers: analyze & explain, never generate code.
+  - Do **not** fix bugs or add features unless user explicitly requests it.
+- **Single-Step Changes:**
+  - Break tasks into atomic steps.
+  - After each change, request confirmation before proceeding.
+- **Reference Backups:**
+  - When a file is “at risk,” first copy it (e.g. `reference.ts`) so Windsurf can compare against working code.
+
+# 3. Documentation Bloat Prevention
+
+- **Single Source:** Only one canonical file per topic under `/docs/`.
+- **No Duplication:** Search existing docs before creating new ones.
+- **Archive Obsolete:** Move replaced or deprecated files to `docs/archive/`, which is excluded from indexing.
+- **File Size:** Aim for <400 lines per file; if a section grows, split into a sub-doc.
+
+# 4. Code Style & Naming Conventions
+
+- **Language:** English only.
+- **Types:** Always declare parameter and return types; avoid `any`.
+- **JSDoc:** Document public classes/methods.
+- **Formatting:** ESLint/Prettier; no blank lines inside functions.
+- **Exports:** One export per file.
+- **Classes:** PascalCase
+- **Variables/Functions:** camelCase
+- **Files/Folders:** kebab-case
+- **Constants/Env:** UPPER_SNAKE_CASE; avoid magic numbers.
+
+# 5. Functions & Data Handling
+
+- **Single Responsibility:** <20 lines, one concern.
+- **Flat Logic:** Use early returns; extract nested blocks.
+- **Functional Methods:** Prefer `map`/`filter`/`reduce`.
+- **Arrow vs Named:** Arrow for <3-statement callbacks; named otherwise.
+- **Defaults & RO-RO:** Use default params and Receive-Object/Return-Object patterns.
+- **Immutability:**
+  - `readonly` props
+  - `as const` for fixed literals
+- **Validation:** Use schemas (Zod) or constructors, not inline checks.
+
+# 6. Windsurf Workflows & Memories
+
+- **Workflows:**
+  - Store in `.windsurf/workflows/*.yaml`.
+  - Declaratively define `on:` triggers and `steps:` for lint/test/build.
+- **Memories:**
+  - Persist in `~/.codeium/windsurf/memories/`.
+  - Capture user stories, decisions, troubleshooting notes.
+- **Keep Them Fresh:** Archive old workflows to `docs/archive/` and prune stale memories.
+
+# 7. Database Changes & Rollbacks
+
+- **SQL Scripts:**
+  - Generate new schema changes as standalone SQL files.
+  - Provide corresponding rollback statements.
+  - Consolidate into `database_schema.sql` and update `database_schema.md`.
+- **RLS & Security:** Ensure row-level security policies are defined in code.
+
+# 8. Version Control & Change Logs
+
+- **Branch Strategy:** feature/…, bugfix/…, hotfix/…
+- **Commit Messages:** Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
+- **CHANGELOG.md:** Append `[YYYY-MM-DD HH:MM] : [Scope] : [Description]` on each change.
+- **Pull Requests:** Require CI pass and ≥1 approval before merge.
+
+# 9. Retrieval & Error Handling
+
+- **Exact Match First:** tags → filenames → titles → full-text.
+- **Ambiguity:** When multiple results, list options and ask “Which one?”
+- **Missing Docs:** “I couldn’t find a file tagged ‘X’. Available tags: …”
+- **Citations:** Use `(see docs/path/to/file.md)`.
+
+# 10. Session & Task Management
+
+- **One Chat, One Context:** Start new Windsurf session for each major feature or bug.
+- **Small Iterations:** Make minimal edits per prompt to avoid cascading errors.
+- **Confirm & Backup:** After each working step, recommend user back up the code.
 
 ---
 
-## 🔷 CORE STANDARDS & BEST PRACTICES
-
-### TypeScript Standards
-- **Strict Mode:** Always use TypeScript strict mode (`"strict": true`)
-- **Type Safety:** No `any` types except in legacy integration points
-- **Interface Definitions:** Define interfaces for all data structures
-- **Null Safety:** Handle null/undefined explicitly with optional chaining
-
-### Error Handling Standards
-- **Comprehensive Catching:** Catch and handle all possible errors
-- **Descriptive Messages:** Error messages must be actionable and clear
-- **Dead Letter Queue:** Failed operations go to dead letter queue
-- **Retry Logic:** Implement exponential backoff for transient failures
-
----
-
-## 🔷 TESTING RULES
-
-### Coverage Requirements
-- **Minimum Coverage:** ≥80% for all exported functions, classes, and modules
-- **Line Coverage:** ≥80% of executable lines must be tested
-- **Branch Coverage:** ≥75% of conditional branches must be tested
-- **Function Coverage:** 100% of exported functions must have tests
-
----
-
-## 🔷 SECURITY RULES
-
-### Data Protection Standards
-- **Encryption at Rest:** All sensitive data must be encrypted using AES-256
-- **Encryption in Transit:** All API communications must use TLS 1.3 or higher
-- **Key Management:** Use secure key management service (AWS KMS, Azure Key Vault)
-
-### Authentication & Authorization
-- **Multi-Factor Authentication:** Required for all admin and production access
-- **Role-Based Access Control:** Implement RBAC with principle of least privilege
-- **JWT Tokens:** Use short-lived JWTs (15 minutes) with refresh tokens
-
----
-
-## 🔷 PERFORMANCE & QUALITY STANDARDS
-
-- **Response Times:** <200ms for 95th percentile
-- **Throughput:** Support 1000+ concurrent requests
-- **Uptime SLA:** 99.9% uptime requirement
-- **Health Checks:** Comprehensive health monitoring
-
----
-
-## 🔷 ARCHITECTURE STANDARDS
-
-- **Strict Layering:** UI → Business Logic → Data Access → Infrastructure
-- **No Circular Dependencies:** Block cycles and auto-sync with package.json
-- **Feature Organization:** Organize code by business capability
-- **Single Responsibility:** One reason to change per module
-
----
-
-## 🔷 DATABASE STANDARDS
-
-- **Connection Pooling:** Use centralized PrismaClient instances
-- **Transaction Management:** Wrap multi-step operations in transactions
-- **Schema Consistency:** All DateTime fields use `@db.Timestamptz(6)`
-- **Migration Safety:** All migrations must be reversible
-
----
-
-## 🔷 PROHIBITED PRACTICES
-
-- No `.skip` or `.only` in committed test code
-- No hardcoded credentials in source code
-- No circular dependencies between modules
-- No shared mutable state between tests
-
----
-
-## 🔷 DOCUMENTATION REQUIREMENTS
-
-- **JSDoc Comments:** 20% minimum comment density
-- **Function Documentation:** All public functions documented
-- **API Documentation:** OpenAPI/Swagger specifications
-- **CHANGELOG:** All changes documented per semver
-
----
-
-## 🔷 FILE ORGANIZATION
-
-- **Test Files:** One test file per source file (feature.ts → feature.test.ts)
-- **Directory Structure:** `apps/{web,api}/(features|components|services|utils)/[a-z-]+/`
-- **Maximum Folder Depth:** 4 levels for simple navigation
-
-For complete details, see individual rule files in `.cline/rules/`
+*These rules ensure the Windsurf agent remains precise, prevents bloat, and enforces our single-source-of-truth documentation approach.*

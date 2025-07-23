@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcription-api
+  namespace: callscript
+  labels:
+    app: transcription-api
+    tier: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: transcription-api
+  template:
+    metadata:
+      labels:
+        app: transcription-api
+    spec:
+      containers:
+      - name: transcription-api
+        image: callscript/transcription-api:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: callscript-secrets
+              key: database-url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: callscript-secrets
+              key: redis-url
+        - name: RUNPOD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: callscript-secrets
+              key: runpod-api-key
+        - name: DO_SPACES_KEY
+          valueFrom:
+            secretKeyRef:
+              name: callscript-secrets
+              key: do-spaces-key
+        - name: DO_SPACES_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: callscript-secrets
+              key: do-spaces-secret
+        - name: DO_SPACES_ENDPOINT
+          value: "https://sfo3.digitaloceanspaces.com"
+        - name: DO_SPACES_BUCKET
+          value: "callscript-transcriptions"
+        - name: DO_REGION
+          value: "sfo3"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transcription-api-service
+  namespace: callscript
+spec:
+  selector:
+    app: transcription-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: transcription-api-ingress
+  namespace: callscript
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  tls:
+  - hosts:
+    - api.callscript.io
+    secretName: callscript-api-tls
+  rules:
+  - host: api.callscript.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: transcription-api-service
+            port:
+              number: 80
